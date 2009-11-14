@@ -5,6 +5,8 @@ package net.jhttp;
  * with default options.
  */
 public class Http {
+    private Http() {}
+    
     /**
      * Get a new {@link HttpClient} instance with default options.
      *
