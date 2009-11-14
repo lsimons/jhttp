@@ -56,10 +56,16 @@ echo "compiling..."
 rm -rf "$classdir"
 mkdir -p "$classdir"
 cd "$srcdir"
+set +e
 javac -nowarn -Xlint:-deprecation -source 1.5 -target 1.5 \
         -d "$classdir" \
         -cp "$CP" \
-        `find . -name '*.java'` || (echo "BUILD FAILED! (compile error)"; exit 1)
+        `find . -name '*.java'`
+if [[ $? -ne 0 ]]; then
+    echo "BUILD FAILED! (compile error)"
+    exit 1
+fi
+set -e
 
 # resources
 #for d in `find . -type d`; do
@@ -79,10 +85,16 @@ mkdir -p "$testclassdir"
 cd "$testdir"
 TCP="$testclassdir:$CP"
 
+set +e
 javac -nowarn -Xlint:-deprecation -source 1.5 -target 1.5 \
         -d "$testclassdir" \
         -cp "$TCP" \
-        `find . -type f -name '*.java'` || (echo "BUILD FAILED! (test compile error)"; exit 1)
+        `find . -type f -name '*.java'`
+if [[ $? -ne 0 ]]; then
+    echo "BUILD FAILED! (compile error)"
+    exit 1
+fi
+set -e
 
 
 
