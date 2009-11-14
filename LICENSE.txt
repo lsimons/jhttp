@@ -24,3 +24,4 @@ THE SOFTWARE.
 Licenses for dependencies:
 -----------------------------------------------------------------------------
 * lib/testng-5.10-jdk15.jar is licensed under lib/testng-5.10-jdk15.LICENSE.txt
+* lib/easymock-2.5.2.jar is licensed under lib/easymock-2.5.2.LICENSE.txt

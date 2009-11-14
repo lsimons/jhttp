@@ -101,7 +101,8 @@ set -e
 echo "testing..."
 cd "$distdir"
 testngxml="$testdir/testng-checkin.xml"
-[[ "$cmd" == "test" ]] && testngxml="$testngxml $testdir/testng-func.xml"
+[[ "$cmd" == "test" \
+    || $cmd == "dist" ]] && testngxml="$testngxml $testdir/testng-func.xml"
 [[ "$cmd" == "integration-test" ]] && testngxml="$testdir/testng-integration.xml"
 
 rm -rf "$testrptdir"

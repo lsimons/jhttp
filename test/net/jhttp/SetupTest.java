@@ -17,16 +17,16 @@ public class SetupTest {
 
     @Test(groups={"broken"})
     public void exampleDisabledFunctionalTest() {
-        assert false;
+        //assert false;
     }
 
     @Test(groups={"broken", "int"})
     public void exampleDisabledIntegrationTest() {
-        assert false;
+        //assert false;
     }
 
     @Test(groups={"broken", "checkin"})
     public void exampleDisabledPreCheckinTest() {
-        assert false;
+        //assert false;
     }
 }

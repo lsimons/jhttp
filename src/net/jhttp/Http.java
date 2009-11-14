@@ -6,11 +6,13 @@ package net.jhttp;
  * {@link HttpClient} instance.
  */
 public class Http {
-    private Http() {}
+    protected Http() {}
 
     /**
      * Get a new {@link HttpClientBuilder}. Useful if you want to customize
      * {@link HttpClient} default behavior.
+     * 
+     * @return a new {@link HttpClientBuilder} instance
      */
     public static HttpClientBuilder clientBuilder() {
         return new HttpClientBuilderImpl();
@@ -31,7 +33,7 @@ public class Http {
      *
      * @return a new {@link HttpRequestBuilder}
      */
-    public static HttpRequestBuilder request() {
+    public static HttpRequestBuilder requestBuilder() {
         return new HttpRequestBuilderImpl();
     }
 }
