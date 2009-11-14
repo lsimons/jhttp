@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="jhttp-functional-tests" verbose="2" parallel="tests">
+    <test name="functional">
+        <groups/>
+        <packages>
+            <package name="net.jhttp"/>
+        </packages>
+        <run>
+            <include name="func"/>
+            <exclude name="broken"/>
+        </run>
+    </test>
+</suite>

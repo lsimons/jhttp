@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+
+<suite name="jHttp-integration-tests" verbose="2" parallel="tests">
+    <test name="integration">
+        <groups/>
+        <packages>
+            <package name="net.jhttp"/>
+        </packages>
+        <run>
+            <include name="int"/>
+            <exclude name="broken"/>
+        </run>
+    </test>
+</suite>

@@ -1,0 +1,7 @@
+JHTTP RELEASE NOTES
+===================
+
+Version 0.1.0 - Released November 14, 2009
+------------------------------------------
+* this version contains no functionality
+* build and packaging setup
