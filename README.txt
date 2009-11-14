@@ -45,6 +45,12 @@ Contribute:
     * Push your changes back to your own github account.
     * Send a pull request to lsimons.
     * Read http://help.github.com/forking/ for more help.
+    * Set a pre-commit hook to make sure you don't break anything:
+cat > .git/hooks/pre-commit <<END
+#!/bin/sh
+
+exec bash build.sh
+END
 
 Support:
     Sorry, none available. Read the docs, read the source code or try google.
