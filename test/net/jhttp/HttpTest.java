@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 @Test(groups={"func"})
 public class HttpTest {
     @Test
-    public void testProtectedConstructor() {
+    public void testPackagePrivateConstructor() {
         Http h = new MyHttp();
     }
     

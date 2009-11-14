@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
-<suite name="jHttp-integration-tests" verbose="2" parallel="tests">
+<suite name="jHttp-integration-tests" verbose="2" parallel="methods">
     <test name="integration">
         <groups/>
         <packages>

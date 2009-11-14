@@ -6,7 +6,7 @@ package net.jhttp;
  * {@link HttpClient} instance.
  */
 public class Http {
-    protected Http() {}
+    Http() {}
 
     /**
      * Get a new {@link HttpClientBuilder}. Useful if you want to customize

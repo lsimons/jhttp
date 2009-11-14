@@ -7,6 +7,15 @@ package net.jhttp;
  */
 public interface HttpClientBuilder {
     /**
+     * Set a custom {@link RequestExecutor} implementation. Mostly useful for
+     * testing.
+     * 
+     * @param requestExecutor the request executor the http client should use
+     * @return this builder
+     */
+    HttpClientBuilder requestExecutor(RequestExecutor requestExecutor);
+    
+    /**
      * Finalize building the http client and return the final result. The
      * builder should be discarded after this call.
      * 
