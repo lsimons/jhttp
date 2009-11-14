@@ -1,0 +1,21 @@
+<html>
+<body>
+<p>jHttp is a java http client library. The main entry point is the {@link net.jhttp.Http} class.</p>
+
+<p>Here's a simple usage example:</p>
+<pre>
+import net.jhttp.Http;
+
+public class Sample {
+  public static void main(String[] args) {
+    String body =
+    
+        Http.client().GET("http://www.example.org/").responseBody();
+    
+    
+    System.out.println(body);
+  }
+}
+</pre>
+</body>
+</html>

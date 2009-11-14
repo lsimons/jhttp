@@ -16,20 +16,21 @@ srcdir="$basedir/src"
 testdir="$basedir/test"
 testrptdir="$currdir/test-output"
 libdir="$basedir/lib"
-classdir="$currdir/build/classes"
-testclassdir="$currdir/build/test-classes"
 distdir="$currdir/build"
+classdir="$distdir/classes"
+testclassdir="$distdir/test-classes"
+apidocdir="$distdir/doc/api"
 
 read version < "$basedir/VERSION" || : echo ignored
 cmd=${1:-build}
 
 # validate
 usage() {
-    echo "./build.sh [-v] [help|clean|compile|test|integration-test|jar|dist|build]"
+    echo "./build.sh [-v] [help|clean|compile|test|integration-test|jar|javadoc|dist|build]"
 }
 
 cmdok=0
-for okcmd in help clean compile test integration-test jar dist build; do
+for okcmd in help clean compile test integration-test jar javadoc dist build; do
     if [[ "$cmd" == "$okcmd" ]]; then
         cmdok=1
         break
@@ -38,7 +39,7 @@ done
 [[ $cmdok -ne 1 ]] && usage && exit 1
 [[ "$cmd" == "help" ]] && usage && exit 0
 if [[ "$cmd" == "clean" ]]; then
-    rm -rf "$classdir" "$testclassdir" "$testrptdir" "$distdir"
+    rm -rf "$distdir"
     exit 0
 fi
 
@@ -124,6 +125,19 @@ jar cf "$distdir/$project-$version.jar" *
 
 
 
+echo "generating javadoc..."
+javadoc \
+    -sourcepath "$srcdir" \
+    -d "$apidocdir" \
+    -windowtitle "$project $version API" \
+    -doctitle "$project $version API" \
+    -link "http://java.sun.com/j2se/1.5.0/docs/api/" \
+    -subpackages net
+
+echo "  javadocs in $apidocdir"
+[[ "$cmd" == "javadoc" ]] && echo "...done" && exit 0
+
+
 echo "packaging..."
 rm -rf "$distdir/$project-$version"
 mkdir -p "$distdir/$project-$version"
@@ -139,6 +153,7 @@ cp -r \
     lib \
     test \
     "$distdir/$project-$version"
+cp -r "$distdir/doc" "$distdir/$project-$version"
 
 cd "$distdir/$project-$version/src"
 mkdir -p META-INF

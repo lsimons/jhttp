@@ -4,7 +4,7 @@ Get:
     git clone git://github.com/lsimons/jhttp.git
 
 Build:
-    ./build.sh
+    ./build.sh dist
     ./build.sh integration-test
     ./build.sh help
 
