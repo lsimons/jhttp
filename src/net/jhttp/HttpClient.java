@@ -1,10 +1,10 @@
 package net.jhttp;
 
 /**
- * Main work interface for this package. Represents a configured client that is ready
- * to make outgoing http requests. May keep hold of connections, may be backed by a
- * connection pool, etc. Most of its methods follow the builder pattern and produce
- * a {@link HttpRequestBuilder}.
+ * Main work interface for this package. Represents a configured client that 
+ * is ready to make outgoing http requests. May keep hold of connections, may 
+ * be backed by a connection pool, etc. Most of its methods follow the 
+ * builder pattern and produce a {@link HttpRequestBuilder}.
  */
 public interface HttpClient {
     /**
