@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
-<suite name="jhttp-pre-checkin-tests" verbose="2" parallel="methods">
+<suite name="jhttp-pre-checkin-tests" verbose="2" parallel="tests">
     <test name="pre-checkin">
         <groups/>
         <packages>

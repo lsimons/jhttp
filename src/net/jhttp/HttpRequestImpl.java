@@ -4,8 +4,6 @@ import java.net.URL;
 import java.net.MalformedURLException;
 
 class HttpRequestImpl implements HttpRequest {
-    private final static String HTTP_VERSION = "HTTP/1.1";
-
     private String protocol;
     private String method;
     private String requestURI;

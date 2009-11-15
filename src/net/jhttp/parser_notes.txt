@@ -1,0 +1,81 @@
+The Parser class operates on buffers that make up a HTTP response.
+
+Though its functionality is mostly generic to requests and responses, it is
+optimized a little bit for response processing.
+
+As it reads through a buffer byte by byte it will go through one of a few
+states: 
+
+  BG    Begin
+  LF    Reading next character as LF (after CR)
+  W     Ignoring whitespace
+  F_1   Reading status line field 1
+  F_1_2 Reading SP between field 1 and 2
+  F_2   Reading field 2
+  F_2_3 Reading SP between field 2 and 3
+  F_3   Reading field 3
+  H     Inside headers
+  HN    Reading header name
+  HV    Inside or at the end of a header value
+  HVV   Reading header value
+  BS    Reading body separator (CRLF)
+  B     Reading body
+
+Chunking is not yet supported.
+
+As soon as the parser moves on to a character that allows it to unambiguously
+know that a particular value has been fully parsed, it will emit that value (for
+use by its listeners).
+
+The parser needs a little help from its listener to determine whether to expect
+a body: it asks its listener for isHeadRequest(), unless it already knows there
+will not be a body anyway (Content-Length 0, or status code 1xx, 204 or 304).
+If there is no body
+
+Given:
+
+    HTTP/1.1 200 OK
+    Content-Type:
+      text/html;
+      charset=ISO-8859-1
+    Content-Length: 11
+
+    Hello World
+
+Here are the parser states and explanations of when things are emitted:
+
+Example:
+
+   HTTP/1.1 SP    200     SP    OK  CR    LF
+^  ^        ^     ^       ^     ^   ^     ^
+BG F_1      F_1_2 F_2     F_2_3 F_3 LF|H  H
+            E:F_1         E:F_2     E:F_3
+
+Content-Type:     CR      LF
+^           ^     ^       ^
+HN          W|HV  LF|W|HV W|HV
+            E:HN
+
+SP     SP      text/html;  CR      LF
+^      ^       ^           ^       ^
+W|HVV  W|HVV   HVV         LF|W|HV W|HV
+
+
+SP    SP charset=ISO-8859-1 CR      LF 
+^        ^                  ^       ^
+W|HVV    HVV                LF|W|HV W|HV
+
+Content-Length:     11   CR    LF
+^             ^     ^    ^     ^
+HN            W|HV  HVV  LF|HV HV
+E:HVV         E:H
+
+CR    LF
+^     ^
+LF|BS B
+E:HVV
+
+Hello world
+^           ^
+B           BG
+E:B         E:EOF
