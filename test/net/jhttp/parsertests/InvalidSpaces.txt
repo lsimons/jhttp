@@ -1,0 +1,28 @@
+ HTTP/1.1 200 OK
+Content-Type: text/plain
+
+----
+HT TP/1.1 200 OK
+Content-Type: text/plain
+
+----
+HTTP/1.1 20 0 OK
+Content-Type: text/plain
+
+----
+HTTP/1.1  200 OK
+Content-Type: text/plain
+
+----
+HTTP/1.1 200  OK
+Content-Type: text/plain
+
+----
+HTTP/1.1 200 OK 
+Content-Type: text/plain
+
+----
+HTTP/1.1 200 OK 
+ Content-Type: text/plain
+
+----

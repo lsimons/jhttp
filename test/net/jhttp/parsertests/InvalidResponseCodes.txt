@@ -1,0 +1,24 @@
+HTTP/1.0 1 OK
+Content-Type: text/plain
+
+----
+HTTP/1.0 20 OK
+Content-Type: text/plain
+
+----
+HTTP/1.0 1000 OK
+Content-Type: text/plain
+
+----
+HTTP/1.0 2000 OK
+Content-Type: text/plain
+
+----
+HTTP/1.0 FOO OK
+Content-Type: text/plain
+
+----
+HTTP/1.0 2OO OK
+Content-Type: text/plain
+
+----

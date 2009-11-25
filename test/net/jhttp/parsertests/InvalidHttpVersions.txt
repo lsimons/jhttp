@@ -1,0 +1,20 @@
+HTTTP/1.0 200 OK
+Content-Type: text/plain
+
+----
+HTP/1.1 200 OK
+Content-Type: text/plain
+
+----
+HTTP/10.9 200 OK
+Content-Type: text/plain
+
+----
+HTTP/1.12 200 OK
+Content-Type: text/plain
+
+----
+FOO 200 OK
+Content-Type: text/plain
+
+----

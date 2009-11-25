@@ -1,0 +1,16 @@
+HTTP/1.0 200 OK
+Content-Type: text/plain
+
+----
+HTTP/1.0 404 OK
+Content-Type: text/plain
+
+----
+HTTP/1.0 000 OK
+Content-Type: text/plain
+
+----
+HTTP/1.0 999 OK
+Content-Type: text/plain
+
+----

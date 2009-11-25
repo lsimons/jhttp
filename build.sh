@@ -96,6 +96,7 @@ if [[ $? -ne 0 ]]; then
 fi
 set -e
 
+rsync -a --exclude="*.java" ./ $testclassdir/
 
 
 echo "testing..."

@@ -38,7 +38,7 @@ class ResponseValidator implements Parser.Listener {
     }
 
     private final static Pattern httpResponseCode = Pattern.compile(
-            "^[2345][012][0-9]$");
+            "^[0-9][0-9][0-9]$");
     private boolean validResponseCode(ByteBuffer field) {
         return httpResponseCode.matcher(asciiCopy(field)).matches();
     }

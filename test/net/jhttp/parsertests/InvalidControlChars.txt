@@ -1,0 +1,53 @@
+\u0000HTTP/1.1 200 OK
+Content-Type: text/plain
+
+----
+HT\u0000TP/1.1 200 OK
+Content-Type: text/plain
+
+----
+HTTP/1.1 20\u00000 OK
+Content-Type: text/plain
+
+----
+HTTP/1.1 \u0000200 OK
+Content-Type: text/plain
+
+----
+HTTP/1.1 200 \u0000OK
+Content-Type: text/plain
+
+----
+HTTP/1.1 200 OK\u0000
+Content-Type: text/plain
+
+----
+HTTP/1.1 200 OK
+\u0000Content-Type: text/plain
+
+----
+HTTP/1.1 200 OK
+Content-Type\u0000: text/plain
+
+----
+HTTP/1.1 200 OK
+Content-Type\u0000 text/plain
+
+----
+HTTP/1.1 200 OK
+Content-Type:\u0000 text/plain
+
+----
+HTTP/1.1 200 OK
+Content-Type: \u0000text/plain
+
+----
+HTTP/1.1 200 OK
+Content-Type: text/plain\u0000
+
+----
+HTTP/1.1 200 OK
+Content-Type: text/plain
+\u0000
+
+----
