@@ -1,6 +1,6 @@
 package net.jhttp;
 
-import static net.jhttp.Util.tryClose;
+import static net.jhttp.Util.*;
 import static net.jhttp.Protocol.*;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ import javax.net.ssl.SSLSocketFactory;
 class DefaultRequestExecutor implements RequestExecutor {
     public HttpResponse execute(HttpRequest request) throws IOException {
         String host = request.getHost();
-        int port = request.getPort();
+        int port = getPort(request);
         
         InetAddress serverAddress = InetAddress.getByName(host);
         if(serverAddress == null) {
@@ -40,12 +40,23 @@ class DefaultRequestExecutor implements RequestExecutor {
             os = new BufferedOutputStream(s.getOutputStream());
             writeRequest(os, request);
             is = new BufferedInputStream(s.getInputStream());
-            return readResponse(is);
+            return readResponse(is, request.getMethod());
         } finally {
             tryClose(s);
             tryClose(os);
             tryClose(is);
         }
+    }
+
+    private int getPort(HttpRequest request) {
+        int port = request.getPort();
+        if (port != -1) {
+            return port;
+        }
+        if ("https".equalsIgnoreCase(request.getProtocol())) {
+            return 443;
+        }
+        return 80;
     }
 
     static void writeRequest(OutputStream os, HttpRequest req)
@@ -83,19 +94,26 @@ class DefaultRequestExecutor implements RequestExecutor {
         os.write(LF);
     }
 
-    static HttpResponse readResponse(InputStream is) throws IOException {
+    static HttpResponse readResponse(InputStream is, String method)
+            throws IOException {
         ResponseAccumulator ra = new ResponseAccumulator();
-        ra.init();
-        Parser p = new Parser(ra);
+        ResponseValidator rv = new ResponseValidator(ra);
+        Parser p = new Parser(rv);
+        if("HEAD".equals(method)) {
+            p.expectHeadRequest(true);
+        }
         
         byte[] buf = new byte[1500];
         int read;
-        while ( (read = is.read(buf)) != -1 && !ra.complete()) {
+        while ( (read = is.read(buf)) != -1) {
             ByteBuffer bb = ByteBuffer.wrap(buf, 0, read);
             p.parse(bb);
         }
         
-        p.forceFinish();
+        if(!ra.complete()) {
+            p.forceFinish();
+        }
+        
         
         return ra.getResponse();
     }

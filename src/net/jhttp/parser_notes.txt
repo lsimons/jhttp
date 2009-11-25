@@ -53,17 +53,17 @@ BG F_1      F_1_2 F_2     F_2_3 F_3 LF|H  H
 
 Content-Type:     CR      LF
 ^           ^     ^       ^
-HN          W|HV  LF|W|HV W|HV
+HN          W|HV  LF|HV   HV
             E:HN
 
 SP     SP      text/html;  CR      LF
 ^      ^       ^           ^       ^
-W|HVV  W|HVV   HVV         LF|W|HV W|HV
+W|HVV  W|HVV   HVV         LF|HV   HV
 
 
 SP    SP charset=ISO-8859-1 CR      LF 
 ^        ^                  ^       ^
-W|HVV    HVV                LF|W|HV W|HV
+W|HVV    HVV                LF|HV   HV
 
 Content-Length:     11   CR    LF
 ^             ^     ^    ^     ^

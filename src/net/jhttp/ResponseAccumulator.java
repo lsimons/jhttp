@@ -1,23 +1,23 @@
 package net.jhttp;
 
-import static net.jhttp.Protocol.ascii;
+import static net.jhttp.Util.ascii;
+import static net.jhttp.Util.copy;
 
-import static java.lang.Math.min;
 import java.nio.ByteBuffer;
-import java.io.InputStream;
-import java.io.IOException;
+import java.util.List;
+import java.util.LinkedList;
 
 class ResponseAccumulator implements Parser.Listener {
-    HttpResponse res;
+    HttpResponseImpl res;
     int statusCode;
     String reasonPhrase;
-    boolean readBody;
+    List<ByteBuffer> bodyParts;
     
     void init() {
         res = null;
         statusCode = -1;
         reasonPhrase = null;
-        readBody = false;
+        bodyParts = null;
     }
 
     boolean complete() {
@@ -32,7 +32,9 @@ class ResponseAccumulator implements Parser.Listener {
     /// Parser.Listener
     ///
     
-    public void messageStart() {}
+    public void messageStart() {
+        init();
+    }
 
     public void startLineFirstField(ByteBuffer field) {
         // HTTP version. Ignore
@@ -40,7 +42,7 @@ class ResponseAccumulator implements Parser.Listener {
 
     public void startLineSecondField(ByteBuffer field) {
         // status code
-        Integer.parseInt(ascii(field));
+        statusCode = Integer.parseInt(ascii(field));
     }
 
     public void startLineThirdField(ByteBuffer field) {
@@ -57,12 +59,14 @@ class ResponseAccumulator implements Parser.Listener {
     }
 
     public void messageComplete() {
-        if(res == null) {
-            res = new HttpResponseImpl(statusCode, reasonPhrase);
-        }
+        res = new HttpResponseImpl(statusCode, reasonPhrase);
+        res.setBody(bodyParts);
     }
 
     public void bodyPart(ByteBuffer bodyPart) {
-        // TODO implement
+        if(this.bodyParts == null) {
+            this.bodyParts = new LinkedList<ByteBuffer>();
+        }
+        this.bodyParts.add(copy(bodyPart));
     }
 }

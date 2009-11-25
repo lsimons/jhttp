@@ -3,10 +3,12 @@ jHttp is a java http client library.
 Get:
     git clone git://github.com/lsimons/jhttp.git
 
+
 Build:
     ./build.sh dist
     ./build.sh integration-test
     ./build.sh help
+
 
 Use:
     API entrypoint is net.jhttp.Http:

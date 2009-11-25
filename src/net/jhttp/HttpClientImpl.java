@@ -6,7 +6,7 @@ class HttpClientImpl implements HttpClient {
     private RequestExecutor requestExecutor;
 
     HttpClientImpl() {
-        requestExecutor = new SimpleRequestExecutor();
+        requestExecutor = new DefaultRequestExecutor();
     }
 
     void setRequestExecutor(RequestExecutor requestExecutor) {

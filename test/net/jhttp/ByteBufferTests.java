@@ -31,7 +31,7 @@ public class ByteBufferTests {
                 v.position(pos);
                 v.limit(b.position() - 1);
                 pos = b.position();
-                System.out.println("v = '" + Protocol.ascii(v) + "'");
+                System.out.println("v = '" + Util.ascii(v) + "'");
             }
         }
     }

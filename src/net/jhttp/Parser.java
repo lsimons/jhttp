@@ -1,6 +1,7 @@
 package net.jhttp;
 
 import static net.jhttp.Protocol.*;
+import static net.jhttp.Util.*;
 
 import java.nio.ByteBuffer;
 import java.io.IOException;
@@ -42,7 +43,6 @@ class Parser {
         HN,
         HV,
         HVV,
-        HVC,
         BS,
         B
     }
@@ -93,7 +93,7 @@ class Parser {
             int accumSize = accum.remaining();
             int bbSize = bb.remaining();
             byte[] b = new byte[accumSize + bbSize];
-            accum.get(b);
+            accum.get(b, 0, accumSize);
             bb.get(b, accumSize, bbSize);
             bb = ByteBuffer.wrap(b);
             accum = null;
@@ -105,6 +105,10 @@ class Parser {
         fieldOffset = 0;
 
         if (state == S.B) {
+            boolean LFOK = eatLF(bb);
+            if(!LFOK) {
+                return;
+            }
             // looks like we landed up in body state after the last parse(...)
             handleBody(bb);
             
@@ -121,7 +125,11 @@ class Parser {
                 break;
             }
         }
-        
+        boolean LFOK = eatLF(bb);
+        if(!LFOK) {
+            return;
+        }
+
         if (state == S.B) {
             // we arrive here only after completing the while(), so if we 
             // are here it is because we just _changed_ to B state
@@ -137,6 +145,21 @@ class Parser {
         }
 
         saveTrailingData(bb);
+    }
+
+    boolean eatLF(ByteBuffer bb) throws IOException {
+        if(needLF) {
+            if(bb.hasRemaining()) {
+                b = bb.get();
+                if (b != LF) {
+                    throw new IOException("CR not followed by LF");
+                }
+                needLF = false;
+                return true;
+            }
+            return false;
+        }
+        return true;
     }
 
     void handleBody(ByteBuffer bb) throws IOException {
@@ -166,6 +189,8 @@ class Parser {
     }
 
     boolean parseOneHeaderByte(ByteBuffer bb) throws IOException {
+        b = bb.get();
+        
         if (needLF) {
             if (b != LF) {
                 throw new IOException("CR not followed by LF");
@@ -180,6 +205,7 @@ class Parser {
                 if (b == CR) {
                     needLF = true;
                 }
+                fieldStart = bb.position();
                 return true;
             }
             skipWS = false;
@@ -198,8 +224,8 @@ class Parser {
                 break;
             case F_1_2:
                 state = S.F_2;
-                fieldStart = bb.position();
-                break;
+                fieldStart = bb.position() - 1;
+                // falls through
             case F_2:
                 if (b == SP) {
                     emit(S.F_2, bb, fieldStart, bb.position() - 1);
@@ -208,14 +234,14 @@ class Parser {
                 break;
             case F_2_3:
                 state = S.F_3;
-                fieldStart = bb.position();
-                break;
+                fieldStart = bb.position() - 1;
+                // falls through
             case F_3:
                 if (b == CR) {
                     emit(S.F_3, bb, fieldStart, bb.position() - 1);
                     needLF = true;
                     state = S.H;
-                    fieldStart = bb.position() + 2;
+                    fieldStart = bb.position() + 1;
                 }
                 break;
             case H:
@@ -233,7 +259,8 @@ class Parser {
                 if (b == COLON) {
                     emit(S.HN, bb, fieldStart, bb.position() - 1);
                     skipWS = true;
-                    state = S.HV;
+                    state = S.HVV;
+                    fieldStart = bb.position();
                 }
                 break;
             case HV:
@@ -241,41 +268,25 @@ class Parser {
                     case SP:
                     case HT:
                         skipWS = true;
+                        state = S.HVV;
                         break;
                     case CR:
+                        emit(S.HVV, bb, fieldStart, bb.position() - 3);
                         needLF = true;
-                        emit(S.BS, null, 0, 0);
                         state = S.B;
+                        fieldStart = bb.position() + 1;
                         return false;
                     default:
-                        state = S.HVV;
-                        fieldStart = bb.position();
+                        emit(S.HVV, bb, fieldStart, bb.position() - 3);
+                        state = S.HN;
+                        fieldStart = bb.position() - 1;
                         break;
                 }
                 break;
             case HVV:
                 if (b == CR) {
                     needLF = true;
-                    state = S.HVC;
-                }
-                break;
-            case HVC:
-                switch(b) {
-                    case SP:
-                    case HT:
-                        skipWS = true;
-                        state = S.HVV;
-                        break;
-                    case CR:
-                        needLF = true;
-                        emit(S.BS, bb, fieldStart, bb.position() - 1);
-                        state = S.B;
-                        return false;
-                    default:
-                        emit(S.HVV, bb, fieldStart, bb.position() - 3);
-                        state = S.HN;
-                        fieldStart = bb.position();
-                        break;
+                    state = S.HV;
                 }
                 break;
             default:
@@ -295,6 +306,7 @@ class Parser {
             if (accum.remaining() > MAX_ACCUMULATION_SIZE) {
                 throw new IOException("Too much remaining data");
             }
+            accum = copy(accum);
         } else if (fieldStart > bb.position()) {
             // skip some characters from the next buffer
             fieldOffset = fieldStart - bb.position();
@@ -313,13 +325,12 @@ class Parser {
             view.limit(end);
         }
 
-        switch (this.state) {
+        switch (state) {
             case F_1:
                 l.startLineFirstField(view);
                 break;
             case F_2:
                 checkHasBody(view);
-                view.position(start);
                 l.startLineSecondField(view);
                 break;
             case F_3:
@@ -329,14 +340,11 @@ class Parser {
                 if (lastHeaderName != null) {
                     l.header(lastHeaderName, null);
                 }
-                lastHeaderName = view;
+                lastHeaderName = copy(view);
                 break;
             case HVV:
                 if (hasBody) {
-                    int pos = lastHeaderName.position();
                     findContentLength(lastHeaderName, view);
-                    lastHeaderName.position(pos);
-                    view.position(start);
                 }
                 l.header(lastHeaderName, view);
                 lastHeaderName = null;
@@ -355,21 +363,22 @@ class Parser {
         }
     }
 
-    private void findContentLength(ByteBuffer name, ByteBuffer view)
+    void findContentLength(ByteBuffer name, ByteBuffer view)
             throws IOException {
-        String header = ascii(name);
-        if("Content-Length".equalsIgnoreCase(header)) {
-            String value = ascii(view).replaceAll("\\s*", "");
+        String header = asciiCopy(name);
+        if ("Content-Length".equalsIgnoreCase(header)) {
+            String value = asciiCopy(view).replaceAll("\\s*", "");
             try {
                 contentLength = Integer.parseInt(value);
+                System.out.println("contentLength = " + contentLength);
             } catch (NumberFormatException e) {
                 throw new IOException(e);
             }
         }
     }
 
-    private void checkHasBody(ByteBuffer statusCode) {
-        String code = ascii(statusCode);
+    void checkHasBody(ByteBuffer statusCode) {
+        String code = asciiCopy(statusCode);
         if(code.startsWith("1") ||
                 code.equals("204") ||
                 code.equals("304")) {

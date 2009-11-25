@@ -1,7 +1,6 @@
 package net.jhttp;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
+import static net.jhttp.Util.ascii;
 
 class Protocol {
     static final int SP = 32;
@@ -15,28 +14,5 @@ class Protocol {
     
     static boolean isLWS(byte b) {
         return (b == SP) || (b == HT) || (b == CR) || (b == LF);
-    }
-
-    static byte[] ascii(String s) {
-        try {
-            return s.getBytes("US-ASCII");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    static String ascii(byte[] b) {
-        try {
-            return new String(b, "US-ASCII");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    static String ascii(ByteBuffer bb) {
-        final int size = bb.remaining();
-        final byte[] b = new byte[size];
-        bb.get(b);
-        return ascii(b);
     }
 }

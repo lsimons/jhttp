@@ -6,7 +6,8 @@ import org.testng.annotations.Test;
 public class BasicIntegrationTest {
     @Test
     public void getGoogle() throws Exception {
-        String b = Http.client().GET("http://www.google.com/").responseBody();
+        String b = Http.client().GET("http://www.google.co.uk/").responseBody();
+        assert b != null;
         assert b.contains("Search");
     }
 
