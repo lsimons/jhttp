@@ -17,6 +17,10 @@ class HttpClientImpl implements HttpClient {
         return Http.requestBuilder().bind(this).GET(url);
     }
 
+    public HttpRequestBuilder HEAD(String url) {
+        return Http.requestBuilder().bind(this).HEAD(url);
+    }
+
     public HttpResponse execute(HttpRequest request) throws IOException {
         return requestExecutor.execute(request);
     }

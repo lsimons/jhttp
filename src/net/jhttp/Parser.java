@@ -370,7 +370,6 @@ class Parser {
             String value = asciiCopy(view).replaceAll("\\s*", "");
             try {
                 contentLength = Integer.parseInt(value);
-                System.out.println("contentLength = " + contentLength);
             } catch (NumberFormatException e) {
                 throw new IOException(e);
             }

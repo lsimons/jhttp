@@ -3,8 +3,10 @@ package net.jhttp;
 import static net.jhttp.Util.ascii;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.List;
-import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class HttpResponseImpl implements HttpResponse {
     private int statusCode;
@@ -20,14 +22,6 @@ class HttpResponseImpl implements HttpResponse {
     public void setBody(String responseBodyString) {
         assert bodyParts == null;
         this.bodyString = responseBodyString;
-    }
-    
-    public void addBodyPart(ByteBuffer bodyPart) {
-        assert bodyString == null;
-        if (bodyParts == null) {
-            bodyParts = new LinkedList<ByteBuffer>();
-        }
-        bodyParts.add(bodyPart);
     }
     
     public void setBody(List<ByteBuffer> bodyParts) {
@@ -60,5 +54,25 @@ class HttpResponseImpl implements HttpResponse {
             buf.append(ascii(bb)); // TODO sniff character encoding
         }
         return buf.toString();
+    }
+
+    private static Pattern characterEncodingRE = Pattern.compile(
+            "^.*?;\\s*charset\\s*=\\s*([^\\s;]+)\\s*(?:;.*)?$",
+            Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    static String sniffCharacterEncoding(String contentType) {
+        if (contentType != null) {
+            Matcher m = characterEncodingRE.matcher(contentType);
+            if (m.matches()) {
+                String characterEncoding = m.group(1);
+                try {
+                    Charset.forName(characterEncoding);
+                    return characterEncoding.trim();
+                } catch (IllegalArgumentException e) {
+                    // fall back
+                }
+            }
+        }
+        return "UTF-8";
     }
 }

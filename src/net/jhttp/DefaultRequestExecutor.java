@@ -18,14 +18,11 @@ import javax.net.ssl.SSLSocketFactory;
 class DefaultRequestExecutor implements RequestExecutor {
     public HttpResponse execute(HttpRequest request) throws IOException {
         String host = request.getHost();
-        int port = getPort(request);
         
         InetAddress serverAddress = InetAddress.getByName(host);
-        if(serverAddress == null) {
-            throw new IOException(String.format(
-                    "Error resolving %s to IP address", host));
-        }
-        
+
+        int port = getPort(request);
+
         Socket s = null;
         OutputStream os = null;
         InputStream is = null;
@@ -48,7 +45,7 @@ class DefaultRequestExecutor implements RequestExecutor {
         }
     }
 
-    private int getPort(HttpRequest request) {
+    int getPort(HttpRequest request) {
         int port = request.getPort();
         if (port != -1) {
             return port;

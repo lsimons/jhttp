@@ -16,7 +16,15 @@ public interface HttpClient {
      * @return a new request builder
      */
     HttpRequestBuilder GET(String url);
-    
+
+    /**
+     * Start creating a HEAD request object bound to this http client.
+     *
+     * @param url the (absolute) url to HEAD 
+     * @return a new request builder
+     */
+    HttpRequestBuilder HEAD(String url);
+
     /**
      * Execute a http request using this http client.
      * 

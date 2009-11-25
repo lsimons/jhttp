@@ -12,6 +12,8 @@ class Protocol {
 
     static final byte[] HTTP_VERSION = ascii("HTTP/1.0");
     
+    Protocol() {}
+    
     static boolean isLWS(byte b) {
         return (b == SP) || (b == HT) || (b == CR) || (b == LF);
     }

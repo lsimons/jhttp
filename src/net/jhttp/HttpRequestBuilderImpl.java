@@ -11,6 +11,10 @@ class HttpRequestBuilderImpl implements HttpRequestBuilder {
         return newRequest("GET", url);
     }
 
+    public HttpRequestBuilder HEAD(String url) {
+        return newRequest("HEAD", url);
+    }
+
     public HttpRequestBuilder newRequest(String method, String url) {
         try {
             request = new HttpRequestImpl(method, url);

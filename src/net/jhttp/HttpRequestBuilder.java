@@ -28,6 +28,14 @@ public interface HttpRequestBuilder {
     HttpRequestBuilder GET(String url);
 
     /**
+     * Start building a new HEAD request for the specified URL.
+     *
+     * @return this builder
+     * @param url the url to GEAD
+     */
+    HttpRequestBuilder HEAD(String url);
+
+    /**
      * Start building a new request with the specified method and URL.
      * 
      * @param method the http request method to use

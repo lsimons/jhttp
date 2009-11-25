@@ -8,6 +8,9 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 class Util {
+    
+    Util() {}
+    
     static void tryClose(Socket s) {
         if (s == null) { return; }
         try { s.close(); }
@@ -64,6 +67,14 @@ class Util {
             return ascii(b);
         } finally {
             bb.position(pos);
+        }
+    }
+
+    static ByteBuffer asciiBuffer(String s) {
+        try {
+            return ByteBuffer.wrap(s.getBytes("US-ASCII"));
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
     }
 }
