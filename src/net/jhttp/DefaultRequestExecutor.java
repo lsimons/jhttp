@@ -17,6 +17,8 @@ import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 
 class DefaultRequestExecutor implements RequestExecutor {
+    HttpTracer httpTracer;
+    
     public HttpResponse execute(HttpRequest request) throws IOException {
         String host = request.getHost();
         
@@ -46,6 +48,10 @@ class DefaultRequestExecutor implements RequestExecutor {
         }
     }
 
+    public void setHttpTracer(HttpTracer httpTracer) {
+        this.httpTracer = httpTracer; 
+    }
+
     int getPort(HttpRequest request) {
         int port = request.getPort();
         if (port != -1) {
@@ -57,7 +63,7 @@ class DefaultRequestExecutor implements RequestExecutor {
         return 80;
     }
 
-    static void writeRequest(OutputStream os, HttpRequest req)
+    void writeRequest(OutputStream os, HttpRequest req)
             throws IOException {
         startLine(os, req.getMethod(), req.getRequestURI());
 
@@ -94,9 +100,13 @@ class DefaultRequestExecutor implements RequestExecutor {
         crlf(os);
         os.flush();
         // todo body
+        
+        if (httpTracer != null) {
+            httpTracer.requestComplete();
+        }
     }
 
-    static void startLine(OutputStream os, String method, String uri)
+    void startLine(OutputStream os, String method, String uri)
             throws IOException {
         os.write(ascii(method));
         os.write(SP);
@@ -104,9 +114,13 @@ class DefaultRequestExecutor implements RequestExecutor {
         os.write(SP);
         os.write(HTTP_VERSION);
         crlf(os);
+        if (httpTracer != null) {
+            httpTracer.requestLine(String.format("%s %s %s",
+                            method, uri, ascii(HTTP_VERSION)));
+        }
     }
     
-    static void header(OutputStream os, String name, String value)
+    void header(OutputStream os, String name, String value)
             throws IOException {
         if (name == null || value == null) { return; }
         
@@ -114,6 +128,9 @@ class DefaultRequestExecutor implements RequestExecutor {
         os.write(COLON);
         os.write(ascii(value));
         crlf(os);
+        if (httpTracer != null) {
+            httpTracer.requestHeader(name, value);
+        }
     }
 
     static void crlf(OutputStream os) throws IOException {
@@ -121,9 +138,9 @@ class DefaultRequestExecutor implements RequestExecutor {
         os.write(LF);
     }
 
-    static HttpResponse readResponse(InputStream is, String method)
+    HttpResponse readResponse(InputStream is, String method)
             throws IOException {
-        ResponseAccumulator ra = new ResponseAccumulator();
+        ResponseAccumulator ra = new ResponseAccumulator(httpTracer);
         ResponseValidator rv = new ResponseValidator(ra);
         Parser p = new Parser(rv);
         if("HEAD".equals(method)) {

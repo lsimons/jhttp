@@ -7,6 +7,15 @@ package net.jhttp;
  */
 public interface HttpClientBuilder {
     /**
+     * Enable request tracing on this http client. Mostly useful for debug
+     * logging.
+     *
+     * @param tracer the request tracer to use
+     * @return this builder
+     */
+    HttpClientBuilder enableTracing(HttpTracer tracer);
+
+    /**
      * Set a custom {@link RequestExecutor} implementation. Mostly useful for
      * testing.
      * 

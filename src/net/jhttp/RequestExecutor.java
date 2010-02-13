@@ -19,4 +19,12 @@ public interface RequestExecutor {
      * @throws IOException if any problem occurs
      */
     HttpResponse execute(HttpRequest request) throws IOException;
+
+    /**
+     * Enable request tracing on this executor. Mostly useful for debug
+     * logging.
+     *
+     * @param tracer the request tracer to use
+     */
+    void setHttpTracer(HttpTracer tracer);
 }

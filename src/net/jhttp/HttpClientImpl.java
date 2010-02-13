@@ -24,4 +24,8 @@ class HttpClientImpl implements HttpClient {
     public HttpResponse execute(HttpRequest request) throws IOException {
         return requestExecutor.execute(request);
     }
+
+    public void setHttpTracer(HttpTracer tracer) {
+        requestExecutor.setHttpTracer(tracer);
+    }
 }

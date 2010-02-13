@@ -41,6 +41,16 @@ public class BasicIntegrationTest {
     }
 
     @Test
+    public void getGoogleWhileTracing() throws Exception {
+        HttpClient client = Http.clientBuilder()
+                .enableTracing(new ConsoleHttpTracer())
+                .build();
+        String b = client.GET("http://www.google.co.uk/").responseBody();
+        assert b != null;
+        assert b.contains("Search");
+    }
+
+    @Test
     public void getGoogle404() throws Exception {
         String u = "http://www.google.com/thispagedoesnotexist/";
         int code = Http.client().GET(u).response().getStatusCode();

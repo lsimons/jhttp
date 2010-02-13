@@ -10,12 +10,21 @@ import java.util.Map;
 import java.util.HashMap;
 
 class ResponseAccumulator implements Parser.Listener {
+    HttpTracer httpTracer;
     HttpResponseImpl res;
+    String version;
     int statusCode;
     String reasonPhrase;
     List<ByteBuffer> bodyParts;
     Map<String, String> headers;
-    
+
+    ResponseAccumulator() {
+    }
+
+    ResponseAccumulator(HttpTracer httpTracer) {
+        this.httpTracer = httpTracer;
+    }
+
     void init() {
         res = null;
         statusCode = -1;
@@ -40,25 +49,31 @@ class ResponseAccumulator implements Parser.Listener {
     }
 
     public void startLineFirstField(ByteBuffer field) {
-        // HTTP version. Ignore
+        version = ascii(field);
     }
 
     public void startLineSecondField(ByteBuffer field) {
-        // status code
         statusCode = Integer.parseInt(ascii(field));
     }
 
     public void startLineThirdField(ByteBuffer field) {
-        // reason phrase
         reasonPhrase = ascii(field).trim();
+        if (httpTracer != null) {
+            httpTracer.statusLine(String.format(
+                    "%s %d %s", version, statusCode, reasonPhrase));
+        }
     }
 
     public void header(ByteBuffer name, ByteBuffer value) {
         if (this.headers == null) {
             this.headers = new HashMap<String, String>(2);
         }
+        String nameString = ascii(name).trim(); 
         String valueString = (value == null)? null : ascii(value).trim(); 
-        this.headers.put(ascii(name).trim(), valueString);
+        this.headers.put(nameString, valueString);
+        if (httpTracer != null) {
+            httpTracer.responseHeader(nameString, valueString);
+        }
     }
 
     public void trailer(ByteBuffer name, ByteBuffer value) {
@@ -69,6 +84,10 @@ class ResponseAccumulator implements Parser.Listener {
         res = new HttpResponseImpl(statusCode, reasonPhrase);
         res.setBody(bodyParts);
         res.setHeaders(headers);
+        
+        if (httpTracer != null) {
+            httpTracer.responseComplete();
+        }
     }
 
     public void bodyPart(ByteBuffer bodyPart) {
