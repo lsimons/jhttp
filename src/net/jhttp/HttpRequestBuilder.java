@@ -36,6 +36,16 @@ public interface HttpRequestBuilder {
     HttpRequestBuilder HEAD(String url);
 
     /**
+     * Add a request header to this builder.
+     * 
+     * @param name the header name. Should not be null.
+     * @param value the header value. Can be null. Use an empty string to set
+     *     an empty header.
+     * @return this builder
+     */
+    HttpRequestBuilder header(String name, String value);
+
+    /**
      * Start building a new request with the specified method and URL.
      * 
      * @param method the http request method to use

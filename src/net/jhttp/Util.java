@@ -58,6 +58,17 @@ class Util {
         return ascii(b);
     }
 
+    static String string(ByteBuffer bb, String characterEncoding) {
+        final int size = bb.remaining();
+        final byte[] b = new byte[size];
+        bb.get(b);
+        try {
+            return new String(b, characterEncoding);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     static String asciiCopy(ByteBuffer bb) {
         final int pos = bb.position();
         try {

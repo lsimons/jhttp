@@ -6,12 +6,15 @@ import static net.jhttp.Util.copy;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.HashMap;
 
 class ResponseAccumulator implements Parser.Listener {
     HttpResponseImpl res;
     int statusCode;
     String reasonPhrase;
     List<ByteBuffer> bodyParts;
+    Map<String, String> headers;
     
     void init() {
         res = null;
@@ -47,11 +50,15 @@ class ResponseAccumulator implements Parser.Listener {
 
     public void startLineThirdField(ByteBuffer field) {
         // reason phrase
-        reasonPhrase = ascii(field);
+        reasonPhrase = ascii(field).trim();
     }
 
     public void header(ByteBuffer name, ByteBuffer value) {
-        // TODO implement
+        if (this.headers == null) {
+            this.headers = new HashMap<String, String>(2);
+        }
+        String valueString = (value == null)? null : ascii(value).trim(); 
+        this.headers.put(ascii(name).trim(), valueString);
     }
 
     public void trailer(ByteBuffer name, ByteBuffer value) {
@@ -61,12 +68,13 @@ class ResponseAccumulator implements Parser.Listener {
     public void messageComplete() {
         res = new HttpResponseImpl(statusCode, reasonPhrase);
         res.setBody(bodyParts);
+        res.setHeaders(headers);
     }
 
     public void bodyPart(ByteBuffer bodyPart) {
-        if(this.bodyParts == null) {
-            this.bodyParts = new LinkedList<ByteBuffer>();
+        if(bodyParts == null) {
+            bodyParts = new LinkedList<ByteBuffer>();
         }
-        this.bodyParts.add(copy(bodyPart));
+        bodyParts.add(copy(bodyPart));
     }
 }

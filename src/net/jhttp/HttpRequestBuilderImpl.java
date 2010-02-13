@@ -2,6 +2,7 @@ package net.jhttp;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Map;
 
 class HttpRequestBuilderImpl implements HttpRequestBuilder {
     private HttpClient httpClient;
@@ -13,6 +14,12 @@ class HttpRequestBuilderImpl implements HttpRequestBuilder {
 
     public HttpRequestBuilder HEAD(String url) {
         return newRequest("HEAD", url);
+    }
+
+    public HttpRequestBuilder header(String name, String value) {
+        Map<String, String> headers = request.getHeaders();
+        headers.put(name, value);
+        return this;
     }
 
     public HttpRequestBuilder newRequest(String method, String url) {

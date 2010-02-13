@@ -11,6 +11,7 @@ import java.io.BufferedInputStream;
 import java.net.Socket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
@@ -59,10 +60,37 @@ class DefaultRequestExecutor implements RequestExecutor {
     static void writeRequest(OutputStream os, HttpRequest req)
             throws IOException {
         startLine(os, req.getMethod(), req.getRequestURI());
-        header(os, "Host", req.getHost());
-        header(os, "Content-Length", "0");
-        header(os, "Connection", "close");
-        header(os, "User-Agent", "jhttp/0.1.0");
+
+        boolean hostSet = false;
+        boolean contentLengthSet = false;
+        boolean connectionSet = false;
+        boolean userAgentSet = false;
+
+        Map<String, String> headers = req.getHeaders();
+        if (headers != null) {
+            for (String name : headers.keySet()) {
+                String value = headers.get(name);
+                if ("Host".equalsIgnoreCase(name)) {
+                    hostSet = true;
+                }
+                if ("Content-Length".equalsIgnoreCase(name)) {
+                    contentLengthSet = true;
+                }
+                if ("Connection".equalsIgnoreCase(name)) {
+                    connectionSet = true;
+                }
+                if ("User-Agent".equalsIgnoreCase(name)) {
+                    userAgentSet = true;
+                }
+                header(os, name, value);
+            }
+        }
+
+        if (!hostSet) { header(os, "Host", req.getHost()); }
+        if (!contentLengthSet) { header(os, "Content-Length", "0"); }
+        if (!connectionSet) { header(os, "Connection", "close"); }
+        if (!userAgentSet) { header(os, "User-Agent", "jhttp/0.1.0"); }
+
         crlf(os);
         os.flush();
         // todo body
@@ -80,6 +108,8 @@ class DefaultRequestExecutor implements RequestExecutor {
     
     static void header(OutputStream os, String name, String value)
             throws IOException {
+        if (name == null || value == null) { return; }
+        
         os.write(ascii(name));
         os.write(COLON);
         os.write(ascii(value));
