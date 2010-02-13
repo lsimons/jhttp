@@ -9,12 +9,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+//import java.util.Arrays;
 
 @Test( groups = { "func" } )
 public class ParserTest {
     static String[][] validTestFiles = new String[][] {
             { "ValidHttpVersions.txt" },
             { "ValidResponseCodes.txt" },
+            { "ValidReasonPhrases.txt" },
+            { "ValidHeaders.txt" },
     };
     @DataProvider(name =  "valid")
     private String[][] getValidTests() {
@@ -76,7 +79,7 @@ public class ParserTest {
         return s.split("----\r\n");
     }
     
-    @Test(dataProvider = "valid")
+    @Test(dataProvider = "valid", groups = { "checkin" })
     public void testParse(String testFile) throws Exception {
         String[] tests = loadTests(testFile);
         
@@ -87,15 +90,20 @@ public class ParserTest {
             p.forceFinish();
             p.forceFinish();
             String result = l.getRequest();
-            System.out.println("test = '" + test + "'");
+            /*System.out.println("test = '" + test + "'");
             System.out.println("result = '" + result + "'");
             System.out.println();
+            System.out.println("test = " +
+                    Arrays.toString(test.getBytes("US-ASCII")));
+            System.out.println("result = " +
+                    Arrays.toString(result.getBytes("US-ASCII")));
+            System.out.println();*/
             assert test.equals(result);
         }
     }
 
     @SuppressWarnings({ "ConstantConditions" })
-    @Test(dataProvider = "invalid", groups = {"broken"})
+    @Test(dataProvider = "invalid", groups = { "checkin" })
     public void testParseError(String testFile) throws Exception {
         String[] tests = loadTests(testFile);
 
@@ -127,7 +135,7 @@ public class ParserTest {
         }
     }
 
-    @Test(groups = { "broken" })
+    @Test(groups = { "func" })
     public void testExpectHead() throws Exception {
         String test = "HTTP/1.1 200 OK\r\nContent-";
 
@@ -145,11 +153,12 @@ public class ParserTest {
         }
     }
 
-    @Test(groups = { "broken" })
+    @Test(groups = { "func" })
     public void testKeepAliveSupport() throws Exception {
         String test1      = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n";
         String test2Part1 = "HTTP/1.1 404 Not Found\r\nCo";
         String test2Part2 = "ntent-Length: 0\r\n\r\n";
+        String test3 = "HTTP/1.1 200 OK\r\n\r\n\r\n";
 
         Listener l = new Listener();
         Parser p = new Parser(new ResponseValidator(l));
@@ -159,11 +168,16 @@ public class ParserTest {
 
         p.parse(Util.asciiBuffer(test2Part2));
         String test2Result = l.getRequest();
-        //System.out.println("test2Result = " + test2Result);
-        //System.out.println("test2Part1 = " + test2Part1);
-        //System.out.println("test2Part2 = " + test2Part2);
+        /*System.out.println("test2Result = " +
+                Arrays.toString(test2Result.getBytes("US-ASCII")));
+        System.out.println("test2Part1 = " +
+                Arrays.toString(test2Part1.getBytes("US-ASCII")));
+        System.out.println("test2Part2 = " +
+                Arrays.toString(test2Part2.getBytes("US-ASCII")));*/
         assert l.completed == 2;
         assert test2Result.equals(test2Part1 + test2Part2);
+
+        p.parse(Util.asciiBuffer(test3));
 
         try {
             p.expectHeadRequest(true);
@@ -203,8 +217,10 @@ public class ParserTest {
 
         public void header(ByteBuffer name, ByteBuffer value) {
             request.append(ascii(name));
-            request.append(": ");
-            request.append(ascii(value));
+            request.append(":");
+            if (value != null) {
+                request.append(ascii(value));
+            }
             request.append("\r\n");
         }
 
@@ -213,6 +229,9 @@ public class ParserTest {
         }
 
         public void messageComplete() {
+            if(!bodyStarted) {
+                request.append("\r\n");
+            }
             completed++;
         }
 

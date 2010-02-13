@@ -1,0 +1,20 @@
+HTTP/1.0 200 OK
+Content-Type: text/plain
+
+----
+HTTP/1.0 404 Not Found
+Content-Type: text/plain
+
+----
+HTTP/1.0 500 Internal Server Error
+Content-Type: text/plain
+
+----
+HTTP/1.0 500 Are you sure that's such a good idea?
+Content-Type: text/plain
+
+----
+HTTP/1.0 200 This is a rather long reason phrase which may get annoying in some cases, but hey, it's valid and it can be convenient to make them this long
+Content-Type: text/plain
+
+----

@@ -25,40 +25,44 @@ class Parser {
         if(state == S.BG) {
             return;
         }
+        if (lastHeaderName != null) {
+            l.header(lastHeaderName, null);
+            lastHeaderName = null;
+        }
         l.messageComplete();
         reset();
     }
 
     // possible parser states
     enum S {
-        BG,
+        BG,    // begin of message
         //no LF, this is a substate handled with a boolean needLF
         //no W,  this is a substate handled with a boolean skipWS
-        F_1,
-        F_1_2,
-        F_2,
-        F_2_3,
-        F_3,
-        H,
-        HN,
-        HV,
-        HVV,
-        BS,
-        B
+        F_1,   // in first header field
+        F_1_2, // looking for second header field
+        F_2,   // in second header field
+        F_2_3, // looking for third header field
+        F_3,   // in third header field
+        H,     // looking for header
+        HN,    // in header name
+        HV,    // looking for header value or continuation of header value
+        HVV,   // inside header value
+        BS,    // looking for body
+        B      // reading body
     }
     
     // all parser state
-    S state;
-    boolean needLF;
-    boolean skipWS;
-    ByteBuffer accum;
-    ByteBuffer lastHeaderName;
-    boolean hasBody;
-    int contentLength;
-    int remainingContent;
-    int fieldStart;
-    int fieldOffset;
-    byte b;
+    S state;                   // current parser state
+    boolean needLF;            // got CR, expect LF next
+    boolean skipWS;            // hop over CR LF SP HT
+    ByteBuffer accum;          // remaining bytes from buffer
+    ByteBuffer lastHeaderName; // header name found
+    boolean hasBody;           // whether message comes with body
+    int contentLength;         // length of message body
+    int remainingContent;      // how much of the message body is not read yet
+    int fieldStart;            // where current field being read starts
+    int fieldOffset;           // bytes out of accum to skip over
+    byte b;                    // current byte
     
     // state is re-initialized after parsing a message, except for the
     // accum variable which can hold leftovers from that parse
@@ -85,6 +89,7 @@ class Parser {
         hasBody = expectHeadRequest;
     }
 
+    // read from bb until it is exhausted or we finish a request
     void parse(ByteBuffer bb) throws IOException {
         if (accum != null) {
             // we had some bytes remaining from a previous parse(...)
@@ -147,6 +152,15 @@ class Parser {
         saveTrailingData(bb);
     }
 
+    /**
+     * Skip over an expected LF.
+     *
+     * Todo: fix the exception/assertion design of this method
+     * 
+     * @param bb the buffer to read a byte from
+     * @return true if we skipped over, false otherwise
+     * @throws IOException if a CR is not followed by LF
+     */
     boolean eatLF(ByteBuffer bb) throws IOException {
         if(needLF) {
             if(bb.hasRemaining()) {
@@ -162,6 +176,7 @@ class Parser {
         return true;
     }
 
+    // process body bytes
     void handleBody(ByteBuffer bb) throws IOException {
         if(!hasBody || contentLength == 0 || remainingContent == 0) {
             l.messageComplete();
@@ -188,6 +203,16 @@ class Parser {
         fieldStart = bb.position();
     }
 
+    /**
+     * Reads one byte from the buffer.
+     * 
+     * Todo: fix the exception/assertion design of this method
+     * 
+     * @param bb the buffer to read from
+     * @return true if parsing should continue, false otherwise
+     * @throws IOException if a CR is not followed by LF
+     * @throws AssertionError if encountered other illegal byte
+     */
     boolean parseOneHeaderByte(ByteBuffer bb) throws IOException {
         b = bb.get();
         
@@ -205,7 +230,6 @@ class Parser {
                 if (b == CR) {
                     needLF = true;
                 }
-                fieldStart = bb.position();
                 return true;
             }
             skipWS = false;
@@ -220,6 +244,8 @@ class Parser {
                 if (b == SP) {
                     emit(S.F_1, bb, fieldStart, bb.position() - 1);
                     state = S.F_1_2;
+                } else {
+                    assert isVersion(b) || isMethod(b);
                 }
                 break;
             case F_1_2:
@@ -230,6 +256,8 @@ class Parser {
                 if (b == SP) {
                     emit(S.F_2, bb, fieldStart, bb.position() - 1);
                     state = S.F_2_3;
+                } else {
+                    assert isStatusCode(b) || isRequestURI(b);
                 }
                 break;
             case F_2_3:
@@ -242,6 +270,12 @@ class Parser {
                     needLF = true;
                     state = S.H;
                     fieldStart = bb.position() + 1;
+                } else {
+                    if (!isReasonPhrase(b) && !isVersion(b)) {
+                        assert isReasonPhrase(b) || isVersion(b);
+                    } else {
+                        assert isReasonPhrase(b) || isVersion(b);
+                    }
                 }
                 break;
             case H:
@@ -252,6 +286,7 @@ class Parser {
                         return false;
                     default:
                         state = S.HN;
+                        assert isHeaderName(b);
                         break;
                 }
                 break;
@@ -261,6 +296,8 @@ class Parser {
                     skipWS = true;
                     state = S.HVV;
                     fieldStart = bb.position();
+                } else {
+                    assert isHeaderName(b);
                 }
                 break;
             case HV:
@@ -277,6 +314,7 @@ class Parser {
                         fieldStart = bb.position() + 1;
                         return false;
                     default:
+                        assert isHeaderValue(b);
                         emit(S.HVV, bb, fieldStart, bb.position() - 3);
                         state = S.HN;
                         fieldStart = bb.position() - 1;
@@ -287,6 +325,8 @@ class Parser {
                 if (b == CR) {
                     needLF = true;
                     state = S.HV;
+                } else {
+                    assert isHeaderValue(b);
                 }
                 break;
             default:
@@ -295,18 +335,16 @@ class Parser {
         return true;
     }
 
+    // populate accum with data we didn't process
     void saveTrailingData(ByteBuffer bb) throws IOException {
         if (fieldStart < bb.position()) {
             // there is some remaining data
-            accum = bb.asReadOnlyBuffer();
-            accum.position(fieldStart);
-            accum.limit(bb.position());
             fieldOffset = 0;
 
-            if (accum.remaining() > MAX_ACCUMULATION_SIZE) {
+            if (bb.remaining() > MAX_ACCUMULATION_SIZE) {
                 throw new IOException("Too much remaining data");
             }
-            accum = copy(accum);
+            accum = copy(bb);
         } else if (fieldStart > bb.position()) {
             // skip some characters from the next buffer
             fieldOffset = fieldStart - bb.position();
@@ -316,6 +354,7 @@ class Parser {
         }
     }
 
+    // hand off some chunk of data to the configured Parser.Listener
     void emit(S state, ByteBuffer bb, int start, int end) throws IOException {
         ByteBuffer view = null;
         
@@ -363,6 +402,7 @@ class Parser {
         }
     }
 
+    // parse out the Content-Length if it is set
     void findContentLength(ByteBuffer name, ByteBuffer view)
             throws IOException {
         String header = asciiCopy(name);
@@ -376,6 +416,7 @@ class Parser {
         }
     }
 
+    // set hasBody based on status code
     void checkHasBody(ByteBuffer statusCode) {
         String code = asciiCopy(statusCode);
         if(code.startsWith("1") ||
@@ -385,6 +426,8 @@ class Parser {
         }
     }
 
+    // to get data out of the parser, other code implements this listener
+    //   see ResponseAccumulator and ResponseValidator
     interface Listener {
         void messageStart();
 

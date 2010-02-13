@@ -1,0 +1,44 @@
+HTTP/1.0 200 OK
+Content-Type: 
+  text/plain
+
+----
+HTTP/1.1 200 OK
+Content-Type:
+  text/plain
+
+----
+HTTP/0.9 200 OK
+Content-Type:
+  text/
+  plain
+
+----
+HTTP/1.2 200 OK
+Content-Type: text/
+  plain
+
+----
+HTTP/2.0 200 OK
+Content-Type: 
+  
+  
+  text/plain
+
+----
+HTTP/2.0 200 OK
+Content-Type: 
+  
+  
+  text/plai  
+  n
+
+----
+HTTP/2.0 200 OK
+Empty-Header:
+
+----
+HTTP/2.0 200 OK
+Header-With-Escaped-Null: \\u0000
+
+----
