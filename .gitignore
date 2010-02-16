@@ -3,3 +3,5 @@ build
 *.ipr
 *.iws
 test-output
+.*.swp
+Session.vim
