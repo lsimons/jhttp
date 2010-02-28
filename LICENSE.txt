@@ -1,6 +1,6 @@
 License for jHttp (the MIT license):
 -----------------------------------------------------------------------------
-Copyright (c) 2009 The jHttp Authors
+Copyright (c) 2009,2010 The jHttp Authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 
-Licenses for dependencies:
+Licenses for test library dependencies:
 -----------------------------------------------------------------------------
 * lib/testng-5.10-jdk15.jar is licensed under lib/testng-5.10-jdk15.LICENSE.txt
 * lib/easymock-2.5.2.jar is licensed under lib/easymock-2.5.2.LICENSE.txt
+
+
+Licenses for code coverage tool:
+-----------------------------------------------------------------------------
+Please see cobertura-1.9.3/README.txt for additional information.
+
+* cobertura-1.9.3/asm-3.0.jar is licensed under cobertura-1.9.3/asm-3.0.LICENSE.txt
+* cobertura-1.9.3/asm-tree-3.0.jar is licensed under cobertura-1.9.3/asm-tree-3.0.LICENSE.txt
+* cobertura-1.9.3/cobertura-1.9.3.jar is licensed under cobertura-1.9.3/cobertura-1.9.3.LICENSE.txt
+* cobertura-1.9.3/jakarta-oro-2.0.8.jar is licensed under cobertura-1.9.3/jakarta-oro-2.0.8.LICENSE.txt
+* cobertura-1.9.3/log4j-1.2.9.jar is licensed under cobertura-1.9.3/log4j-1.2.9.LICENSE.txt
