@@ -31,9 +31,49 @@ public interface HttpRequestBuilder {
      * Start building a new HEAD request for the specified URL.
      *
      * @return this builder
-     * @param url the url to GEAD
+     * @param url the url to HEAD
      */
     HttpRequestBuilder HEAD(String url);
+
+    /**
+     * Start building a new GET request for the specified URL.
+     *
+     * @return this builder
+     * @param url the url to PUT
+     */
+    HttpRequestBuilder PUT(String url);
+
+    /**
+     * Start building a new POST request for the specified URL.
+     *
+     * @return this builder
+     * @param url the url to POST
+     */
+    HttpRequestBuilder POST(String url);
+
+    /**
+     * Start building a new DELETE request for the specified URL.
+     *
+     * @return this builder
+     * @param url the url to DELETE
+     */
+    HttpRequestBuilder DELETE(String url);
+
+    /**
+     * Start building a new OPTIONS request for the specified URL.
+     *
+     * @return this builder
+     * @param url the url to OPTIONS
+     */
+    HttpRequestBuilder OPTIONS(String url);
+
+    /**
+     * Start building a new TRACE request for the specified URL.
+     *
+     * @return this builder
+     * @param url the url to TRACE
+     */
+    HttpRequestBuilder TRACE(String url);
 
     /**
      * Add a request header to this builder.
@@ -44,6 +84,14 @@ public interface HttpRequestBuilder {
      * @return this builder
      */
     HttpRequestBuilder header(String name, String value);
+
+    /**
+     * Set the request body for this builder.
+     *
+     * @param body the request body. Should not be null.
+     * @return this builder
+     */
+    HttpRequestBuilder body(String body);
 
     /**
      * Start building a new request with the specified method and URL.

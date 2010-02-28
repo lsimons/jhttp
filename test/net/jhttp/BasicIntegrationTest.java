@@ -82,4 +82,71 @@ public class BasicIntegrationTest {
         assert contentType != null;
         assert contentType.toLowerCase().contains("text/html");
     }
+
+    @Test
+    public void optionsApache() throws Exception {
+        String u = "http://www.apache.org/";
+        HttpResponse res = Http.clientBuilder()
+                .build()
+                .OPTIONS(u).response();
+        int code = res.getStatusCode();
+        assert 200 <= code && code <= 400;
+        Map<String, String> headers = res.getHeaders();
+        String allow = headers.get("Allow");
+        assert allow != null;
+        assert allow.toUpperCase().contains("GET");
+    }
+
+    @Test
+    public void optionsApacheServer() throws Exception {
+        String u = "http://www.apache.org/";
+        HttpClient c = Http.clientBuilder()
+                .enableTracing(new ConsoleHttpTracer())
+                .build();
+        HttpRequestBuilder hrb = Http.requestBuilder();
+        HttpRequest req = hrb.OPTIONS("*")
+                .header("Host", "www.apache.org")
+                .build();
+        HttpResponse res = c.execute(req);
+        int code = res.getStatusCode();
+        assert 200 <= code && code <= 400;
+    }
+
+    @Test
+    public void traceApache() throws Exception {
+        String u = "http://www.apache.org/";
+        HttpResponse res = Http.clientBuilder()
+                .build()
+                .TRACE(u).response();
+        int code = res.getStatusCode();
+        assert 200 <= code && code <= 400;
+        Map<String, String> headers = res.getHeaders();
+        String contentType = headers.get("Content-Type");
+        assert contentType != null;
+        assert contentType.toLowerCase().contains("message/http");
+    }
+
+    @Test(groups = {"broken"})
+    public void putWorkspace() throws Exception {
+        String u = "http://localhost:8080/brickabrack/ws/78BF2E19-5193-47A5-84F6-EC8445DCCA3F";
+        HttpResponse res = Http.clientBuilder()
+                .enableTracing(new ConsoleHttpTracer())
+                .build()
+                .PUT(u)
+                .header("Content-Type", "application/xml;charset=UTF-8")
+                .body(
+"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+"<workspace xmlns=\"http://schemas.fabric.bbc.co.uk/brickabrack/v1/\"" +
+        " id=\"urn:uuid:78BF2E19-5193-47A5-84F6-EC8445DCCA3F\">\n" +
+"  <name>Charles Dickens</name>\n" +
+"  <children>\n" +
+"    <workspace id=\"urn:uuid:3B13D2F8-347E-4988-8DA3-A2D3F91F2B24\">\n" +
+"      <name>Novels</name>\n" +
+"    </workspace>\n" +
+"  </children>\n" +
+"</workspace>"
+                ).response();
+        int code = res.getStatusCode();
+        assert 200 <= code && code <= 300;
+    }
 }

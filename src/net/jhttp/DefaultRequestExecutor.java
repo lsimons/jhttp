@@ -100,14 +100,35 @@ class DefaultRequestExecutor implements RequestExecutor {
                 header(os, "Host", req.getHost() + ":" + port);
             }
         }
-        if (!contentLengthSet) { header(os, "Content-Length", "0"); }
+        
+        // TODO more efficient handling of body
+        
+        String method = req.getMethod();
+        String body = req.getBodyAsString();
+        byte[] bodyData = null;
+        if (!contentLengthSet) {
+            if (body == null) {
+                if (!"GET".equals(method) &&
+                        !"HEAD".equals(method) &&
+                        !"DELETE".equals(method)) {
+                    header(os, "Content-Length", "0");
+                }
+            } else {
+                bodyData = body.getBytes();
+                header(os, "Content-Length", Integer.toString(bodyData.length));
+            }
+        }
         if (!connectionSet) { header(os, "Connection", "close"); }
         if (!userAgentSet) { header(os, "User-Agent", "jhttp/0.1.0"); }
 
         crlf(os);
         os.flush();
-        // todo body
         
+        if (bodyData != null) {
+            os.write(bodyData);
+        }
+        os.flush();
+
         if (httpTracer != null) {
             httpTracer.requestComplete();
         }
