@@ -25,4 +25,12 @@ public interface HttpMessage {
      * @param headers the message headers. May be null.
      */
     void setHeaders(Map<String, String> headers);
+
+    /**
+     * Get the http response body as a string. Since this loads the entire
+     * response body in memory, this is not advisable for large response bodies.
+     *
+     * @return the http response body, or null if there is no body
+     */
+    String getBodyAsString();
 }

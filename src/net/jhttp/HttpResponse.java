@@ -5,14 +5,6 @@ package net.jhttp;
  */
 public interface HttpResponse extends HttpMessage {
     /**
-     * Get the http response body as a string. Since this loads the entire
-     * response body in memory, this is not advisable for large response bodies.
-     * 
-     * @return the http response body, or null if there is no body
-     */
-    String getBodyAsString();
-
-    /**
      * Get the http response status code.
      * 
      * @return the status code

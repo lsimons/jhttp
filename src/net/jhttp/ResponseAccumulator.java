@@ -2,12 +2,13 @@ package net.jhttp;
 
 import static net.jhttp.Util.ascii;
 import static net.jhttp.Util.copy;
+import static net.jhttp.CaseInsensitiveComparator.CASE_INSENSITIVE;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.TreeMap;
 
 class ResponseAccumulator implements Parser.Listener {
     HttpTracer httpTracer;
@@ -66,7 +67,7 @@ class ResponseAccumulator implements Parser.Listener {
 
     public void header(ByteBuffer name, ByteBuffer value) {
         if (this.headers == null) {
-            this.headers = new HashMap<String, String>(2);
+            this.headers = new TreeMap<String, String>(CASE_INSENSITIVE);
         }
         String nameString = ascii(name).trim(); 
         String valueString = (value == null)? null : ascii(value).trim(); 
