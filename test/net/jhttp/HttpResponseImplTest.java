@@ -50,6 +50,23 @@ public class HttpResponseImplTest {
         assert res.getBodyAsString() == null;
     }
 
+    @Test(dataProvider = "headerSpellings")
+    public void testCaseSensitivity(String name, String value,
+            String expected) {
+        HttpResponseImpl res = new HttpResponseImpl(200, "OK");
+        res.getHeaders().put(name, value);
+        assert res.sniffCharacterEncoding().equals(expected);
+    }
+
+    @DataProvider(name = "headerSpellings")
+    public String[][] getHeaderSpellings() {
+        return new String[][]{
+                { "content-type", ";charset=ISO-8859-1", "ISO-8859-1" },
+                { "Content-Type", ";charset=ISO-8859-1", "ISO-8859-1" },
+                { "CONTENT-TYPE", ";charset=ISO-8859-1", "ISO-8859-1" },
+        };
+    }
+
     @Test(dataProvider = "sampleEncodings")
     public void testCharacterEncodingSniffer(String input, String expected) {
         assert expected.equals(

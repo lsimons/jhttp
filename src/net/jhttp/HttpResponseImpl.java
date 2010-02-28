@@ -9,12 +9,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class HttpResponseImpl implements HttpResponse {
+class HttpResponseImpl extends HttpMessageImpl implements HttpResponse {
     private int statusCode;
     private String reasonPhrase;
     private String bodyString;
     private List<ByteBuffer> bodyParts;
-    private Map<String, String> headers;
 
     public HttpResponseImpl(int statusCode, String reasonPhrase) {
         this.statusCode = statusCode;
@@ -60,19 +59,12 @@ class HttpResponseImpl implements HttpResponse {
         return buf.toString();
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
-    }
-
     private static Pattern characterEncodingRE = Pattern.compile(
             "^.*?;\\s*charset\\s*=\\s*([^\\s;]+)\\s*(?:;.*)?$",
             Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     String sniffCharacterEncoding() {
+        Map<String, String> headers = getHeaders();
         if (headers == null) {
             return "UTF-8";
         } else {
