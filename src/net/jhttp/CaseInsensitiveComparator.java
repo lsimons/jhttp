@@ -17,6 +17,6 @@ class CaseInsensitiveComparator implements Comparator<String> {
             return -1;
         }
 
-        return o2.compareToIgnoreCase(o2);
+        return o1.compareToIgnoreCase(o2);
     }
 }
